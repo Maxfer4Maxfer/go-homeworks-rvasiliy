@@ -1,0 +1,1057 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">/Users/maxim/Movies/!_Course/Go/Разработка-веб-сервисов-на-Golang/2 week SQL и NoSQL/Домашнее задание №2/hw6_db_explorer/api.go (88.9%)</option>
+				
+				<option value="file1">/Users/maxim/Movies/!_Course/Go/Разработка-веб-сервисов-на-Golang/2 week SQL и NoSQL/Домашнее задание №2/hw6_db_explorer/database.go (87.9%)</option>
+				
+				<option value="file2">/Users/maxim/Movies/!_Course/Go/Разработка-веб-сервисов-на-Golang/2 week SQL и NoSQL/Домашнее задание №2/hw6_db_explorer/db_explorer.go (92.3%)</option>
+				
+				<option value="file3">/Users/maxim/Movies/!_Course/Go/Разработка-веб-сервисов-на-Golang/2 week SQL и NoSQL/Домашнее задание №2/hw6_db_explorer/main.go (0.0%)</option>
+				
+				<option value="file4">/Users/maxim/Movies/!_Course/Go/Разработка-веб-сервисов-на-Golang/2 week SQL и NoSQL/Домашнее задание №2/hw6_db_explorer/router.go (96.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "reflect"
+        "strconv"
+        "strings"
+
+        "github.com/maxfer4maxfer/goDebuger"
+)
+
+func getTableFromDatabase(w http.ResponseWriter, r *http.Request, db *database, tName string) *table <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">table, err := db.getTable(tName)
+
+        if err != nil &amp;&amp; strings.Contains(err.Error(), "There is no table with the name") </span><span class="cov8" title="1">{
+                w.Header().Set("Content-Type", "application/json")
+                w.WriteHeader(http.StatusNotFound)
+
+                data := make(map[string]string)
+                data["error"] = "unknown table"
+                errJSON, _ := json.Marshal(data)
+                w.Write(errJSON)
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">return table</span>
+}
+
+type databaseAPI struct {
+        db *database
+}
+
+func (api *databaseAPI) getAllTables(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">tables, err := api.db.getAllTables()
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+        }</span>
+
+        <span class="cov8" title="1">data := make(map[string]map[string][]string)
+        data["response"] = make(map[string][]string)
+        data["response"]["tables"] = make([]string, 0)
+        for _, t := range tables </span><span class="cov8" title="1">{
+                data["response"]["tables"] = append(data["response"]["tables"], t)
+        }</span>
+
+        // data -&gt; json
+        <span class="cov8" title="1">resultJSON, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write(resultJSON)</span>
+
+}
+
+func (api *databaseAPI) getRows(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // get input parameters
+        <span class="cov8" title="1">tName := strings.Split(strings.Trim(r.URL.Path, "/"), "/")[0]
+        limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+        if err != nil </span><span class="cov8" title="1">{
+                limit = 5
+        }</span>
+        <span class="cov8" title="1">offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+        if err != nil </span><span class="cov8" title="1">{
+                offset = 0
+        }</span>
+
+        // find a table
+        <span class="cov8" title="1">table := getTableFromDatabase(w, r, api.db, tName)
+        if table == nil </span><span class="cov8" title="1">{
+                return
+        }</span>
+
+        // get all rows
+        <span class="cov8" title="1">rows, err := table.getRows(limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+        }</span>
+
+        // convert rows to json applicabale data structure
+        <span class="cov8" title="1">data := make(map[string]map[string][]map[string]interface{})
+        data["response"] = make(map[string][]map[string]interface{})
+        data["response"]["records"] = make([]map[string]interface{}, 0)
+        for _, row := range rows </span><span class="cov8" title="1">{
+                dataRow := make(map[string]interface{})
+                for _, c := range row.cells </span><span class="cov8" title="1">{
+                        switch c.cellType </span>{
+                        case "int":<span class="cov8" title="1">
+                                dataRow[c.colName] = c.value.(int)</span>
+                        case "string":<span class="cov8" title="1">
+                                switch c.value </span>{
+                                case nil:<span class="cov8" title="1">
+                                        dataRow[c.colName] = c.value</span>
+                                default:<span class="cov8" title="1">
+                                        dataRow[c.colName] = c.value.(string)</span>
+                                }
+                        }
+                }
+                <span class="cov8" title="1">data["response"]["records"] = append(data["response"]["records"], dataRow)</span>
+        }
+
+        // convert to JSON
+        <span class="cov8" title="1">resultJSON, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        // write output
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write(resultJSON)</span>
+}
+
+func (api *databaseAPI) getRowByID(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // get input parameters
+        <span class="cov8" title="1">tName := strings.Split(strings.Trim(r.URL.Path, "/"), "/")[0]
+        tID, err := strconv.Atoi(strings.Split(strings.Trim(r.URL.Path, "/"), "/")[1])
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+                return
+        }</span>
+
+        // find a table
+        <span class="cov8" title="1">table := getTableFromDatabase(w, r, api.db, tName)
+        if table == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">row, err := table.getRowByID(tID)
+
+        if err != nil &amp;&amp; strings.Contains(err.Error(), "Can't get a row with id") </span><span class="cov8" title="1">{
+                w.Header().Set("Content-Type", "application/json")
+                w.WriteHeader(http.StatusNotFound)
+
+                data := make(map[string]string)
+                data["error"] = "record not found"
+                errJSON, _ := json.Marshal(data)
+                w.Write(errJSON)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+                return
+        }</span>
+
+        // convert a row to json applicabale data structure
+        <span class="cov8" title="1">data := make(map[string]map[string]map[string]interface{})
+        data["response"] = make(map[string]map[string]interface{})
+        data["response"]["record"] = make(map[string]interface{})
+        for _, c := range row.cells </span><span class="cov8" title="1">{
+                switch c.cellType </span>{
+                case "int":<span class="cov8" title="1">
+                        data["response"]["record"][c.colName] = c.value.(int)</span>
+                case "string":<span class="cov8" title="1">
+                        switch c.value </span>{
+                        case nil:<span class="cov8" title="1">
+                                data["response"]["record"][c.colName] = c.value</span>
+                        default:<span class="cov8" title="1">
+                                data["response"]["record"][c.colName] = c.value.(string)</span>
+                        }
+                }
+        }
+
+        // convert to JSON
+        <span class="cov8" title="1">resultJSON, err := json.Marshal(data)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        // write output
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+        w.Write(resultJSON)</span>
+}
+
+func (api *databaseAPI) addRow(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">tName := strings.Split(strings.Trim(r.URL.Path, "/"), "/")[0]
+
+        // find a table
+        table := getTableFromDatabase(w, r, api.db, tName)
+        if table == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">defer r.Body.Close()
+
+        var input interface{}
+        body, _ := ioutil.ReadAll(r.Body)
+        json.Unmarshal(body, &amp;input)
+
+        in, _ := input.(map[string]interface{})
+
+        putValues := make(map[string]interface{}, 0)
+        for _, col := range table.columns </span><span class="cov8" title="1">{
+                if !col.pk </span><span class="cov8" title="1">{
+                        v, ok := in[col.name]
+                        if ok </span><span class="cov8" title="1">{
+                                putValues[col.name] = v
+                        }</span>
+                        <span class="cov8" title="1">if !ok &amp;&amp; col.Null </span><span class="cov8" title="1">{
+                                putValues[col.name] = nil
+                        }</span>
+                        // default values
+                        <span class="cov8" title="1">if !ok &amp;&amp; !col.Null </span><span class="cov8" title="1">{
+                                switch col.colType </span>{
+                                case "text":<span class="cov8" title="1">
+                                        fallthrough</span>
+                                case "varchar(255)":<span class="cov8" title="1">
+                                        putValues[col.name] = ""</span>
+                                case "int":<span class="cov0" title="0">
+                                        putValues[col.name] = 0</span>
+                                }
+
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">id, err := table.addRow(putValues)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        data := make(map[string]map[string]int64)
+        data["response"] = make(map[string]int64)
+        data["response"][table.getPrimaryKey()] = id
+        respJSON, _ := json.Marshal(data)
+        w.Write(respJSON)</span>
+
+}
+
+func (api *databaseAPI) updateRow(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // get input parameters
+        <span class="cov8" title="1">tName := strings.Split(strings.Trim(r.URL.Path, "/"), "/")[0]
+        tID, err := strconv.Atoi(strings.Split(strings.Trim(r.URL.Path, "/"), "/")[1])
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+                return
+        }</span>
+
+        // find a table
+        <span class="cov8" title="1">table := getTableFromDatabase(w, r, api.db, tName)
+        if table == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">defer r.Body.Close()
+
+        var input interface{}
+        body, _ := ioutil.ReadAll(r.Body)
+        json.Unmarshal(body, &amp;input)
+
+        in, _ := input.(map[string]interface{})
+
+        putValues := make(map[string]interface{}, 0)
+        for _, col := range table.columns </span><span class="cov8" title="1">{
+                v, ok := in[col.name]
+                if !col.pk &amp;&amp; ok &amp;&amp; v != nil </span><span class="cov8" title="1">{
+                        // validate type of v and col.Type
+                        matchType := false
+                        if col.colType == "int" &amp;&amp; reflect.TypeOf(v).Name() == "float64" </span><span class="cov0" title="0">{
+                                matchType = true
+                        }</span>
+                        <span class="cov8" title="1">if (col.colType == "text" || col.colType == "varchar(255)") &amp;&amp; reflect.TypeOf(v).Name() == "string" </span><span class="cov8" title="1">{
+                                matchType = true
+                        }</span>
+
+                        <span class="cov8" title="1">if matchType </span><span class="cov8" title="1">{
+                                putValues[col.name] = v
+                        }</span> else<span class="cov8" title="1"> {
+                                w.Header().Set("Content-Type", "application/json")
+                                w.WriteHeader(http.StatusBadRequest)
+
+                                data := make(map[string]string)
+                                data["error"] = fmt.Sprintf("field %v have invalid type", col.name)
+                                errJSON, _ := json.Marshal(data)
+                                w.Write(errJSON)
+                                return
+                        }</span>
+                }
+                <span class="cov8" title="1">if !col.pk &amp;&amp; ok &amp;&amp; v == nil &amp;&amp; col.Null </span><span class="cov8" title="1">{
+                        putValues[col.name] = v
+                }</span>
+
+                <span class="cov8" title="1">if !col.pk &amp;&amp; ok &amp;&amp; v == nil &amp;&amp; !col.Null </span><span class="cov8" title="1">{
+                        w.Header().Set("Content-Type", "application/json")
+                        w.WriteHeader(http.StatusBadRequest)
+
+                        data := make(map[string]string)
+                        data["error"] = fmt.Sprintf("field %v have invalid type", col.name)
+                        errJSON, _ := json.Marshal(data)
+                        w.Write(errJSON)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">if col.pk &amp;&amp; ok </span><span class="cov8" title="1">{
+                        w.Header().Set("Content-Type", "application/json")
+                        w.WriteHeader(http.StatusBadRequest)
+
+                        data := make(map[string]string)
+                        data["error"] = fmt.Sprintf("field %v have invalid type", col.name)
+                        errJSON, _ := json.Marshal(data)
+                        w.Write(errJSON)
+                        return
+                }</span>
+        }
+
+        <span class="cov8" title="1">id, err := table.updateRow(tID, putValues)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        data := make(map[string]map[string]int64)
+        data["response"] = make(map[string]int64)
+        data["response"]["updated"] = id
+        respJSON, _ := json.Marshal(data)
+        w.Write(respJSON)</span>
+
+}
+
+func (api *databaseAPI) deleteRow(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // get input parameters
+        <span class="cov8" title="1">tName := strings.Split(strings.Trim(r.URL.Path, "/"), "/")[0]
+        tID, err := strconv.Atoi(strings.Split(strings.Trim(r.URL.Path, "/"), "/")[1])
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(w, err)
+                return
+        }</span>
+
+        // find a table
+        <span class="cov8" title="1">table := getTableFromDatabase(w, r, api.db, tName)
+        if table == nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+
+        <span class="cov8" title="1">resp, err := table.deleteRowByID(tID)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(http.StatusOK)
+
+        data := make(map[string]map[string]int64)
+        data["response"] = make(map[string]int64)
+        data["response"]["deleted"] = resp
+        respJSON, _ := json.Marshal(data)
+        w.Write(respJSON)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "database/sql"
+        "fmt"
+        "strings"
+
+        "github.com/maxfer4maxfer/goDebuger"
+)
+
+// --------------------- cell ---------------------
+type cell struct {
+        value    interface{}
+        cellType string
+        colName  string
+}
+
+func (c cell) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("\t%v : %v\n", c.value, c.cellType)
+}</span>
+
+func (c *cell) initiate(colName string, cellType string) error <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">switch cellType </span>{
+        case "INT":<span class="cov8" title="1">
+                var varInt int
+                c.value = &amp;varInt</span>
+        case "VARCHAR", "TEXT":<span class="cov8" title="1">
+                var varString sql.NullString
+                c.value = &amp;varString</span>
+        }
+        <span class="cov8" title="1">c.colName = colName
+        c.cellType = cellType
+        return nil</span>
+}
+
+func (c *cell) convertToGoType() error <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">switch c.cellType </span>{
+        case "INT":<span class="cov8" title="1">
+                c.value = *(c.value.(*int))
+                c.cellType = "int"</span>
+        case "VARCHAR", "TEXT":<span class="cov8" title="1">
+                ns := *(c.value.(*sql.NullString))
+                if ns.Valid </span><span class="cov8" title="1">{
+                        c.value = ns.String
+                }</span> else<span class="cov8" title="1"> {
+                        c.value = nil
+                }</span>
+                <span class="cov8" title="1">c.cellType = "string"</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// --------------------- row ---------------------
+type row struct {
+        cells []*cell
+}
+
+func (r row) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%v", r.cells)
+}</span>
+
+func (r *row) getCellValues() []interface{} <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">result := make([]interface{}, 0)
+        for _, cell := range r.cells </span><span class="cov8" title="1">{
+                result = append(result, cell.value)
+        }</span>
+        <span class="cov8" title="1">return result</span>
+}
+
+// --------------------- column ---------------------
+type column struct {
+        name    string
+        colType string
+        pk      bool
+        Null    bool
+}
+
+func (c column) String() string <span class="cov0" title="0">{
+        pk := ""
+        if c.pk </span><span class="cov0" title="0">{
+                pk = "*"
+        }</span>
+        <span class="cov0" title="0">return fmt.Sprintf("\t%v%v[%v]\n", pk, c.name, c.colType)</span>
+}
+
+// --------------------- table ---------------------
+type table struct {
+        db      *database
+        name    string
+        columns []*column
+}
+
+func (t table) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%v : \n\t%v\n ", t.name, t.columns)
+}</span>
+
+func (t table) getPrimaryKey() string <span class="cov8" title="1">{
+        for _, c := range t.columns </span><span class="cov8" title="1">{
+                if c.pk </span><span class="cov8" title="1">{
+                        return c.name
+                }</span>
+        }
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (t table) getRows(limit int, offset int) ([]*row, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">query := fmt.Sprintf(`SELECT * FROM %s LIMIT %d OFFSET %d`, t.name, limit, offset)
+        rows, err := t.db.executeQuery(query)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">return rows, err</span>
+}
+
+func (t table) getRowByID(id int) (*row, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">query := fmt.Sprintf(`SELECT * FROM %s WHERE %s = %d`, t.name, t.getPrimaryKey(), id)
+        rows, err := t.db.executeQuery(query)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">if len(rows) != 1 </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("Can't get a row with id(%v) = %v in the table %v", t.getPrimaryKey(), id, t.name)
+        }</span>
+
+        <span class="cov8" title="1">return rows[0], err</span>
+}
+
+func (t table) addRow(values map[string]interface{}) (int64, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">columnsNames := make([]string, 0)
+        putValues := make([]interface{}, 0)
+        for _, column := range t.columns </span><span class="cov8" title="1">{
+                if !column.pk </span><span class="cov8" title="1">{
+                        columnsNames = append(columnsNames, column.name)
+                        putValues = append(putValues, values[column.name])
+                }</span>
+        }
+
+        <span class="cov8" title="1">inputColumns := strings.Join(columnsNames, ", ")
+
+        placeholders := "?" + strings.Repeat(", ?", len(putValues)-1)
+
+        query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", t.name, inputColumns, placeholders)
+
+        id, err := t.db.execute(query, putValues...)
+        if err != nil </span><span class="cov0" title="0">{
+                return -1, err
+        }</span>
+
+        <span class="cov8" title="1">return id.LastInsertId()</span>
+}
+
+func (t table) updateRow(id int, values map[string]interface{}) (int64, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // create a slice like [[fieldName1 =?] [fieldName2 = ?] ...]
+        <span class="cov8" title="1">setTemplate := make([]string, 0)
+        putValues := make([]interface{}, 0)
+        for _, column := range t.columns </span><span class="cov8" title="1">{
+                _, ok := values[column.name]
+                if !column.pk &amp;&amp; ok </span><span class="cov8" title="1">{
+                        setTemplate = append(setTemplate, fmt.Sprintf("%v = ?", column.name))
+                        putValues = append(putValues, values[column.name])
+                }</span>
+        }
+        <span class="cov8" title="1">placeholders := strings.Join(setTemplate, ", ")
+
+        query := fmt.Sprintf("UPDATE %s SET %s WHERE %s = %d", t.name, placeholders, t.getPrimaryKey(), id)
+
+        resp, err := t.db.execute(query, putValues...)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return -1, err
+        }</span>
+
+        <span class="cov8" title="1">return resp.RowsAffected()</span>
+}
+
+func (t table) deleteRowByID(id int) (int64, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">query := fmt.Sprintf("DELETE FROM %s WHERE %s = ?", t.name, t.getPrimaryKey())
+
+        resp, err := t.db.execute(query, id)
+        if err != nil </span><span class="cov0" title="0">{
+                return -1, err
+        }</span>
+
+        <span class="cov8" title="1">return resp.RowsAffected()</span>
+}
+
+// --------------------- database ---------------------
+type database struct {
+        conn   *sql.DB
+        tables []*table
+}
+
+func (db database) String() string <span class="cov0" title="0">{
+        return fmt.Sprintf("%v", db.tables)
+}</span>
+
+func (db *database) refreshDatabaseStructure() error <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">tables := make([]*table, 0)
+
+        qTables, err := db.conn.Query("SHOW TABLES")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">for qTables.Next() </span><span class="cov8" title="1">{
+                table := &amp;table{
+                        db: db,
+                }
+
+                err = qTables.Scan(&amp;table.name)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // Get all columns for the table
+                <span class="cov8" title="1">columns := make([]*column, 0)
+
+                qColumns, err := db.conn.Query("SHOW FULL COLUMNS FROM " + table.name)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">for qColumns.Next() </span><span class="cov8" title="1">{
+                        column := &amp;column{}
+                        var tmp sql.NullString
+                        var pk string
+                        var Null string
+                        err = qColumns.Scan(&amp;column.name, &amp;column.colType, &amp;tmp, &amp;Null, &amp;pk, &amp;tmp, &amp;tmp, &amp;tmp, &amp;tmp)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov8" title="1">if pk == "PRI" </span><span class="cov8" title="1">{
+                                column.pk = true
+                        }</span>
+
+                        <span class="cov8" title="1">if Null == "YES" </span><span class="cov8" title="1">{
+                                column.Null = true
+                        }</span>
+
+                        <span class="cov8" title="1">columns = append(columns, column)</span>
+                }
+                <span class="cov8" title="1">qColumns.Close()
+
+                // put a columns slice to a table variable
+                table.columns = columns
+
+                tables = append(tables, table)</span>
+        }
+        <span class="cov8" title="1">qTables.Close()
+
+        db.tables = tables
+
+        return nil</span>
+}
+
+func (db *database) getTable(tName string) (*table, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">table := &amp;table{}
+        for _, t := range db.tables </span><span class="cov8" title="1">{
+                if tName == t.name </span><span class="cov8" title="1">{
+                        table = t
+                }</span>
+        }
+
+        <span class="cov8" title="1">if table.name == "" </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("There is no table with the name %v", tName)
+        }</span>
+
+        <span class="cov8" title="1">return table, nil</span>
+
+}
+
+func (db *database) getAllTables() ([]string, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">result := make([]string, 0)
+        for _, t := range db.tables </span><span class="cov8" title="1">{
+                result = append(result, t.name)
+        }</span>
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+func (db *database) execute(query string, values ...interface{}) (sql.Result, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        <span class="cov8" title="1">return db.conn.Exec(query, values...)</span>
+}
+
+func (db *database) executeQuery(query string) ([]*row, error) <span class="cov8" title="1">{
+        if DEBUG </span><span class="cov8" title="1">{
+                fmt.Println(goDebuger.GetCurrentFunctionName())
+        }</span>
+
+        // execute a SQL query
+        <span class="cov8" title="1">qRows, err := db.conn.Query(query)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        // we have an empty result. Result has got 0 rows.
+        <span class="cov8" title="1">rows := make([]*row, 0)
+        for qRows.Next() </span><span class="cov8" title="1">{
+
+                // create input row
+                qRow := &amp;row{
+                        cells: make([]*cell, 0),
+                }
+
+                // prepare cells to database column types
+                columnTypes, _ := qRows.ColumnTypes()
+                for _, columnType := range columnTypes </span><span class="cov8" title="1">{
+                        cell := &amp;cell{}
+                        cell.initiate(columnType.Name(), columnType.DatabaseTypeName())
+                        qRow.cells = append(qRow.cells, cell)
+                }</span>
+
+                // read row from database
+                <span class="cov8" title="1">err = qRows.Scan(qRow.getCellValues()...)
+                if err != nil </span><span class="cov0" title="0">{
+                        panic(err)</span>
+                }
+
+                // convert from database types to go types
+                <span class="cov8" title="1">for _, c := range qRow.cells </span><span class="cov8" title="1">{
+                        c.convertToGoType()
+                }</span>
+
+                //put the getted row to the resulted rows set
+                <span class="cov8" title="1">rows = append(rows, qRow)</span>
+        }
+
+        <span class="cov8" title="1">qRows.Close()
+
+        return rows, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "database/sql"
+        "net/http"
+)
+
+// тут вы пишете код
+// обращаю ваше внимание - в этом задании запрещены глобальные переменные
+
+func NewDbExplorer(dbConn *sql.DB) (http.Handler, error) <span class="cov8" title="1">{
+
+        db := &amp;database{
+                conn: dbConn,
+        }
+
+        err := db.refreshDatabaseStructure()
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">api := &amp;databaseAPI{
+                db: db,
+        }
+
+        router := newRouter()
+        router.setHandler(api.getAllTables, "/", "GET")
+        router.setHandler(api.getRows, "/table", "GET")
+        router.setHandler(api.getRowByID, "/table/id", "GET")
+        router.setHandler(api.addRow, "/table", "PUT")
+        router.setHandler(api.updateRow, "/table/id", "POST")
+        router.setHandler(api.deleteRow, "/table/id", "DELETE")
+
+        return router, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// тут лежит тестовый код
+// менять вам может потребоваться только коннект к базе
+package main
+
+import (
+        "database/sql"
+        "fmt"
+        "net/http"
+
+        _ "github.com/go-sql-driver/mysql"
+)
+
+const DEBUG = true
+
+var (
+        // DSN это соединение с базой
+        // вы можете изменить этот на тот который вам нужен
+        // docker run -p 3306:3306 -v $(PWD):/docker-entrypoint-initdb.d -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=golang -d mysql
+        DSN = "root:1234@tcp(localhost:3306)/golang?charset=utf8"
+        // DSN = "coursera:5QPbAUufx7@tcp(localhost:3306)/coursera?charset=utf8"
+)
+
+func main() <span class="cov0" title="0">{
+        db, err := sql.Open("mysql", DSN)
+        err = db.Ping() // вот тут будет первое подключение к базе
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">handler, err := NewDbExplorer(db)
+        // _, err = NewDbExplorer(db)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("starting server at :8082")
+        http.ListenAndServe(":8082", handler)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "fmt"
+        "net/http"
+        "strings"
+)
+
+type route struct {
+        handler http.HandlerFunc
+        path    string
+}
+
+type router struct {
+        routes map[string][]*route
+}
+
+func newRouter() *router <span class="cov8" title="1">{
+        r := &amp;router{
+                routes: make(map[string][]*route),
+        }
+        r.routes["GET"] = make([]*route, 0)
+        r.routes["PUT"] = make([]*route, 0)
+        r.routes["POST"] = make([]*route, 0)
+        r.routes["DELETE"] = make([]*route, 0)
+        return r
+}</span>
+
+func (rt *router) setHandler(h http.HandlerFunc, path string, method string) error <span class="cov8" title="1">{
+        path = strings.Trim(path, "/")
+        switch method </span>{
+        case "GET":<span class="cov8" title="1">
+                rt.routes["GET"] = append(rt.routes["GET"], &amp;route{h, path})</span>
+        case "PUT":<span class="cov8" title="1">
+                rt.routes["PUT"] = append(rt.routes["PUT"], &amp;route{h, path})</span>
+        case "POST":<span class="cov8" title="1">
+                rt.routes["POST"] = append(rt.routes["POST"], &amp;route{h, path})</span>
+        case "DELETE":<span class="cov8" title="1">
+                rt.routes["DELETE"] = append(rt.routes["DELETE"], &amp;route{h, path})</span>
+        default:<span class="cov0" title="0">
+                return fmt.Errorf("Unsupported method: %s", method)</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func pathMatch(p1 []string, p2 []string) bool <span class="cov8" title="1">{
+        // fmt.Println(p1, p2, len(p1), len(p2))
+        switch len(p1) </span>{
+        case 1:<span class="cov8" title="1">
+                if p1[0] == "" &amp;&amp; p2[0] == "" </span><span class="cov8" title="1">{
+                        // fmt.Println("1")
+                        return true
+                }</span>
+                <span class="cov8" title="1">if p1[0] != "" &amp;&amp; p2[0] != "" &amp;&amp; len(p2) == 1 </span><span class="cov8" title="1">{
+                        // fmt.Println("2")
+                        return true
+                }</span>
+        default:<span class="cov8" title="1">
+                if len(p1) == len(p2) </span><span class="cov8" title="1">{
+                        // fmt.Println("3")
+                        return true
+                }</span>
+        }
+        <span class="cov8" title="1">return false</span>
+}
+
+func (rt *router) ServeHTTP(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+
+        urlPath := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+
+        for _, route := range rt.routes[r.Method] </span><span class="cov8" title="1">{
+                rPath := strings.Split(route.path, "/")
+                // fmt.Println("------------------")
+                // fmt.Println("rPath", rPath)
+                // fmt.Println("urlPath", urlPath)
+                // fmt.Println("pathMatch(rPath, urlPath)", pathMatch(rPath, urlPath))
+                if pathMatch(rPath, urlPath) </span><span class="cov8" title="1">{
+                        route.handler.ServeHTTP(w, r)
+                        return
+                }</span>
+        }
+
+        // rt.routes["GET"][0].handler.ServeHTTP(w, r)
+        // fmt.Fprintln(w, r)
+        // fmt.Fprintln(w, r.Method)
+        // fmt.Fprintln(w, r.FormValue("limit"))
+        // fmt.Fprintln(w, r.URL.RawQuery) //!!!!
+        // fmt.Fprintln(w, r.URL.Path)     //!!!!
+        // fmt.Fprintln(w, strings.Split(r.URL.Path, "/"))
+        // fmt.Fprintln(w, r.URL.Query().Get("limit"))
+        // // w.Write([]byte(fmt.Sprintf("%T", db)))
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

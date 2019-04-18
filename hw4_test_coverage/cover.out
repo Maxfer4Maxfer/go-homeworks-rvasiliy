@@ -1,0 +1,25 @@
+mode: set
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:64.80,67.19 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:70.2,70.20 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:73.2,73.20 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:82.2,97.16 10 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:103.2,107.25 3 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:126.2,128.16 3 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:133.2,135.43 2 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:142.2,142.21 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:67.19,69.3 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:70.20,72.3 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:73.20,75.3 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:97.16,98.54 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:101.3,101.50 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:98.54,100.4 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:108.31,109.44 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:110.38,111.53 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:112.29,115.17 3 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:118.3,118.44 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:121.3,121.73 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:115.17,117.4 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:118.44,120.4 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:128.16,130.3 1 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:135.43,138.3 2 1
+/Users/maxim/Movies/!_Course/Go/Разработка веб-сервисов на Go - основы языка/hw4_test_coverage/client.go:138.8,140.3 1 1
